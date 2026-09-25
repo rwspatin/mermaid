@@ -16,6 +16,7 @@ deaccelerators
 doublecircle
 elem
 elems
+eventgateway
 eventmodeling
 gantt
 gitgraph

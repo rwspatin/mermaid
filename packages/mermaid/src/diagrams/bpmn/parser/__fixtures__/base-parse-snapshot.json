@@ -1,0 +1,2241 @@
+{
+  "baseCommit": "0fc2ec5d5493293a167ef04fb18ae6e99b7a6ab3",
+  "generator": "packages/mermaid/scripts/bpmnBaseParseSnapshot.mts",
+  "source": "e2e dev-diagrams + mermaid-example blocks in docs/syntax/{bpmn,bpmnElements}.md",
+  "entries": [
+    {
+      "name": "dev/01-order-handling.mmd",
+      "source": "bpmn-beta LR\ntitle Order handling\n  pool \"Order handling\"\n    lane \"Sales\"\n      start message s1 \"Order received\"\n      user task t1 \"Approve order\"\n        boundary timer b1 \"2 days\"\n      xor gw \"Approved?\"\n    lane \"Warehouse\"\n      service task t2 \"Pick items\"\n      end e1 \"Shipped\"\n  s1 --> t1 --> gw\n  gw -- yes --> t2 --> e1\n  b1 --> t2\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Order handling",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Sales",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 4,
+            "qualifier": "message",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Approve order",
+            "level": 4,
+            "qualifier": "user",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "event",
+            "keyword": "boundary",
+            "id": "b1",
+            "label": "2 days",
+            "level": 6,
+            "qualifier": "timer",
+            "parentId": "t1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw",
+            "label": "Approved?",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-3",
+            "label": "Warehouse",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Pick items",
+            "level": 4,
+            "qualifier": "service",
+            "parentId": "lane-3"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Shipped",
+            "level": 4,
+            "parentId": "lane-3"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "gw",
+            "kind": "sequence"
+          },
+          {
+            "from": "gw",
+            "to": "t2",
+            "kind": "sequence",
+            "label": "yes"
+          },
+          {
+            "from": "t2",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "b1",
+            "to": "t2",
+            "kind": "sequence"
+          }
+        ],
+        "title": "Order handling"
+      }
+    },
+    {
+      "name": "dev/02-collaboration.mmd",
+      "source": "bpmn-beta LR\n  pool \"Customer\"\n    lane \"Buyer\"\n      start c1 \"Places order\"\n      end c2 \"Receives goods\"\n  pool \"Supplier\"\n    lane \"Sales\"\n      receive task t1 \"Receive order\"\n      send task t2 \"Confirm order\"\n      end e1 \"Order handled\"\n  c1 -.-> t1\n  t1 --> t2 --> e1\n  t2 -.-> c2\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Customer",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Buyer",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "c1",
+            "label": "Places order",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "c2",
+            "label": "Receives goods",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-3",
+            "label": "Supplier",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-4",
+            "label": "Sales",
+            "level": 2,
+            "parentId": "pool-3"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Receive order",
+            "level": 4,
+            "qualifier": "receive",
+            "parentId": "lane-4"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Confirm order",
+            "level": 4,
+            "qualifier": "send",
+            "parentId": "lane-4"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Order handled",
+            "level": 4,
+            "parentId": "lane-4"
+          }
+        ],
+        "flows": [
+          {
+            "from": "c1",
+            "to": "t1",
+            "kind": "message"
+          },
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "c2",
+            "kind": "message"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev/03-events-catch.mmd",
+      "source": "bpmn-beta TB\n  lane \"Catching events\"\n    start message a1 \"Message\"\n    start timer a2 \"Timer\"\n    start conditional a3 \"Conditional\"\n    start signal a4 \"Signal\"\n    intermediate link a5 \"Link\"\n    intermediate multiple a6 \"Multiple\"\n    start parallel-multiple a7 \"Parallel multiple\"\n",
+      "parsed": {
+        "direction": "TB",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Catching events",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "a1",
+            "label": "Message",
+            "level": 2,
+            "qualifier": "message",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "a2",
+            "label": "Timer",
+            "level": 2,
+            "qualifier": "timer",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "a3",
+            "label": "Conditional",
+            "level": 2,
+            "qualifier": "conditional",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "a4",
+            "label": "Signal",
+            "level": 2,
+            "qualifier": "signal",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "intermediate",
+            "id": "a5",
+            "label": "Link",
+            "level": 2,
+            "qualifier": "link",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "intermediate",
+            "id": "a6",
+            "label": "Multiple",
+            "level": 2,
+            "qualifier": "multiple",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "a7",
+            "label": "Parallel multiple",
+            "level": 2,
+            "qualifier": "parallel-multiple",
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": []
+      }
+    },
+    {
+      "name": "dev/04-events-throw.mmd",
+      "source": "bpmn-beta TB\n  lane \"Throwing events\"\n    end message b1 \"Message\"\n    end error b2 \"Error\"\n    end escalation b3 \"Escalation\"\n    end cancel b4 \"Cancel\"\n    end terminate b5 \"Terminate\"\n    throw compensation b6 \"Compensation\"\n    throw signal b7 \"Signal\"\n",
+      "parsed": {
+        "direction": "TB",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Throwing events",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "b1",
+            "label": "Message",
+            "level": 2,
+            "qualifier": "message",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "b2",
+            "label": "Error",
+            "level": 2,
+            "qualifier": "error",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "b3",
+            "label": "Escalation",
+            "level": 2,
+            "qualifier": "escalation",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "b4",
+            "label": "Cancel",
+            "level": 2,
+            "qualifier": "cancel",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "b5",
+            "label": "Terminate",
+            "level": 2,
+            "qualifier": "terminate",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "throw",
+            "id": "b6",
+            "label": "Compensation",
+            "level": 2,
+            "qualifier": "compensation",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "throw",
+            "id": "b7",
+            "label": "Signal",
+            "level": 2,
+            "qualifier": "signal",
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": []
+      }
+    },
+    {
+      "name": "dev/05-gateways-and-activities.mmd",
+      "source": "bpmn-beta TB\n  lane \"Gateways\"\n    xor g1 \"Exclusive\"\n    and g2 \"Parallel\"\n    or g3 \"Inclusive\"\n    event-gateway g4 \"Event-based\"\n    complex g5 \"Complex\"\n  lane \"Activities\"\n    user task t1 \"User\"\n    service task t2 \"Service\"\n    script task t3 \"Script\"\n    manual task t4 \"Manual\"\n    subprocess t5 \"Sub-process\"\n    call t6 \"Call activity\"\n",
+      "parsed": {
+        "direction": "TB",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Gateways",
+            "level": 0
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "g1",
+            "label": "Exclusive",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "and",
+            "id": "g2",
+            "label": "Parallel",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "or",
+            "id": "g3",
+            "label": "Inclusive",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "event-gateway",
+            "id": "g4",
+            "label": "Event-based",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "complex",
+            "id": "g5",
+            "label": "Complex",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Activities",
+            "level": 0
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "User",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Service",
+            "level": 2,
+            "qualifier": "service",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t3",
+            "label": "Script",
+            "level": 2,
+            "qualifier": "script",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t4",
+            "label": "Manual",
+            "level": 2,
+            "qualifier": "manual",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "subprocess",
+            "id": "t5",
+            "label": "Sub-process",
+            "level": 2,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "call",
+            "id": "t6",
+            "label": "Call activity",
+            "level": 2,
+            "parentId": "lane-2"
+          }
+        ],
+        "flows": []
+      }
+    },
+    {
+      "name": "dev/06-artifacts.mmd",
+      "source": "bpmn-beta LR\n  lane \"Fulfilment\"\n    start s1 \"Begin\"\n    group \"Warehouse work\"\n      task t1 \"Pick items\"\n      task t2 \"Pack\"\n    data d1 \"Pick list\"\n    data-store ds1 \"Inventory\"\n    note n1 \"Stock checked nightly\"\n    end e1 \"Done\"\n  s1 --> t1 --> t2 --> e1\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Fulfilment",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Begin",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "group",
+            "keyword": "group",
+            "id": "group-2",
+            "label": "Warehouse work",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Pick items",
+            "level": 4,
+            "parentId": "group-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Pack",
+            "level": 4,
+            "parentId": "group-2"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "d1",
+            "label": "Pick list",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "store",
+            "keyword": "data-store",
+            "id": "ds1",
+            "label": "Inventory",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "annotation",
+            "keyword": "note",
+            "id": "n1",
+            "label": "Stock checked nightly",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Done",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev/07-group.mmd",
+      "source": "bpmn-beta LR\n  lane \"Sales\"\n    start message s1 \"Order received\"\n    group \"Approval\"\n      user task t1 \"Review order\"\n      xor gw \"Approved?\"\n    end e1 \"Done\"\n  s1 --> t1 --> gw --> e1\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Sales",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 2,
+            "qualifier": "message",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "group",
+            "keyword": "group",
+            "id": "group-2",
+            "label": "Approval",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Review order",
+            "level": 4,
+            "qualifier": "user",
+            "parentId": "group-2"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw",
+            "label": "Approved?",
+            "level": 4,
+            "parentId": "group-2"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Done",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "gw",
+            "kind": "sequence"
+          },
+          {
+            "from": "gw",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev/08-black-box-pool.mmd",
+      "source": "bpmn-beta LR\n  pool \"Order handling\"\n    lane \"Sales\"\n      start message s1 \"Order received\"\n      user task t1 \"Approve order\"\n      service task t2 \"Charge the customer card\"\n    lane \"Warehouse\"\n      service task t3 \"Pick items from the shelves\"\n      end message e1 \"Customer has been notified of shipment\"\n  pool \"Courier\"\n  pool \"Supplier\"\n  s1 --> t1\n  t1 --> t2\n  t2 --> t3\n  t3 --> e1\n  t1 --> e1\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Order handling",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Sales",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 4,
+            "qualifier": "message",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Approve order",
+            "level": 4,
+            "qualifier": "user",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Charge the customer card",
+            "level": 4,
+            "qualifier": "service",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-3",
+            "label": "Warehouse",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t3",
+            "label": "Pick items from the shelves",
+            "level": 4,
+            "qualifier": "service",
+            "parentId": "lane-3"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Customer has been notified of shipment",
+            "level": 4,
+            "qualifier": "message",
+            "parentId": "lane-3"
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-4",
+            "label": "Courier",
+            "level": 0
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-5",
+            "label": "Supplier",
+            "level": 0
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "t3",
+            "kind": "sequence"
+          },
+          {
+            "from": "t3",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev/09-data-associations.mmd",
+      "source": "bpmn-beta LR\n  pool \"Order handling\"\n    lane \"Sales\"\n      start s1 \"Order received\"\n      data-input d1 \"Order form\"\n      user task t1 \"Check the order\"\n      data-output d2 \"Approval\"\n      data-collection d3 \"Line items\"\n      end e1 \"Filed\"\n      note n1 \"Against the price list\"\n  s1 --> t1\n  t1 --> e1\n  d1 ..> t1\n  t1 ..> d2\n  d3 ..> t1\n  n1 ... t1\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Order handling",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Sales",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "d1",
+            "label": "Order form",
+            "level": 4,
+            "qualifier": "input",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Check the order",
+            "level": 4,
+            "qualifier": "user",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "d2",
+            "label": "Approval",
+            "level": 4,
+            "qualifier": "output",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "d3",
+            "label": "Line items",
+            "level": 4,
+            "qualifier": "collection",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Filed",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "annotation",
+            "keyword": "note",
+            "id": "n1",
+            "label": "Against the price list",
+            "level": 4,
+            "parentId": "lane-2"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "d1",
+            "to": "t1",
+            "kind": "association",
+            "directed": true
+          },
+          {
+            "from": "t1",
+            "to": "d2",
+            "kind": "association",
+            "directed": true
+          },
+          {
+            "from": "d3",
+            "to": "t1",
+            "kind": "association",
+            "directed": true
+          },
+          {
+            "from": "n1",
+            "to": "t1",
+            "kind": "association",
+            "directed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev/10-cross-pool-message-flows.mmd",
+      "source": "bpmn-beta LR\ntitle Message flows between four participants\n  pool \"Laboratorium\"\n    lane \"Systemy\"\n      end message a1 \"Raport przekazany\"\n  pool \"Scudo AI Desktop\"\n    lane \"Operator\"\n      start message b1 \"Operator wskazuje pliki\"\n      end b2 \"Gotowe\"\n  pool \"SharePoint\"\n    lane \"Graph\"\n      task c1 \"Zapis pliku w kanale\"\n  pool \"Gabinet\"\n    lane \"Lekarz\"\n      end d1 \"Lekarz odczytuje raport\"\n  a1 -.-> b1\n  b1 --> b2\n  b2 -.-> c1\n  c1 -.-> d1\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Laboratorium",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Systemy",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "a1",
+            "label": "Raport przekazany",
+            "level": 4,
+            "qualifier": "message",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-3",
+            "label": "Scudo AI Desktop",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-4",
+            "label": "Operator",
+            "level": 2,
+            "parentId": "pool-3"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "b1",
+            "label": "Operator wskazuje pliki",
+            "level": 4,
+            "qualifier": "message",
+            "parentId": "lane-4"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "b2",
+            "label": "Gotowe",
+            "level": 4,
+            "parentId": "lane-4"
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-5",
+            "label": "SharePoint",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-6",
+            "label": "Graph",
+            "level": 2,
+            "parentId": "pool-5"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "c1",
+            "label": "Zapis pliku w kanale",
+            "level": 4,
+            "parentId": "lane-6"
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-7",
+            "label": "Gabinet",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-8",
+            "label": "Lekarz",
+            "level": 2,
+            "parentId": "pool-7"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "d1",
+            "label": "Lekarz odczytuje raport",
+            "level": 4,
+            "parentId": "lane-8"
+          }
+        ],
+        "flows": [
+          {
+            "from": "a1",
+            "to": "b1",
+            "kind": "message"
+          },
+          {
+            "from": "b1",
+            "to": "b2",
+            "kind": "sequence"
+          },
+          {
+            "from": "b2",
+            "to": "c1",
+            "kind": "message"
+          },
+          {
+            "from": "c1",
+            "to": "d1",
+            "kind": "message"
+          }
+        ],
+        "title": "Message flows between four participants"
+      }
+    },
+    {
+      "name": "dev/11-gateway-branches.mmd",
+      "source": "bpmn-beta LR\ntitle A gateway branching above and below its own line\n  pool \"Handling\"\n    lane \"Work\"\n      start message s \"Request received\"\n      xor gw \"Which way?\"\n      user task up \"Check the register\"\n      service task down \"Charge the card\"\n      end e \"Filed\"\n  s --> gw\n  gw -- nie --> up\n  gw -- tak --> down\n  up --> e\n  down --> e\n",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Handling",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Work",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s",
+            "label": "Request received",
+            "level": 4,
+            "qualifier": "message",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw",
+            "label": "Which way?",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "up",
+            "label": "Check the register",
+            "level": 4,
+            "qualifier": "user",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "down",
+            "label": "Charge the card",
+            "level": 4,
+            "qualifier": "service",
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e",
+            "label": "Filed",
+            "level": 4,
+            "parentId": "lane-2"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s",
+            "to": "gw",
+            "kind": "sequence"
+          },
+          {
+            "from": "gw",
+            "to": "up",
+            "kind": "sequence",
+            "label": "nie"
+          },
+          {
+            "from": "gw",
+            "to": "down",
+            "kind": "sequence",
+            "label": "tak"
+          },
+          {
+            "from": "up",
+            "to": "e",
+            "kind": "sequence"
+          },
+          {
+            "from": "down",
+            "to": "e",
+            "kind": "sequence"
+          }
+        ],
+        "title": "A gateway branching above and below its own line"
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#1",
+      "source": "bpmn-beta LR\n  lane \"Order handling\"\n    start message s1 \"Order received\"\n    user task t1 \"Check stock\"\n    xor gw \"In stock?\"\n    end e1 \"Order shipped\"\n  s1 --> t1 --> gw --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Order handling",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 2,
+            "qualifier": "message",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Check stock",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw",
+            "label": "In stock?",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Order shipped",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "gw",
+            "kind": "sequence"
+          },
+          {
+            "from": "gw",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#2",
+      "source": "bpmn-beta LR\ntitle Order handling\naccTitle: How an order is handled\naccDescr: An order is received, checked by sales and then filed.\n  lane \"Sales\"\n    start s1 \"Order received\"\n    user task t1 \"Check the order\"\n    end e1 \"Filed\"\n  s1 --> t1 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Sales",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Check the order",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Filed",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ],
+        "title": "Order handling",
+        "accTitle": "How an order is handled",
+        "accDescr": "An order is received, checked by sales and then filed."
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#3",
+      "source": "bpmn-beta LR\n  pool \"Order handling\"\n    lane \"Sales\"\n      start s1 \"Order received\"\n      task t1 \"Approve order\"\n    lane \"Warehouse\"\n      task t2 \"Pick items\"\n      end e1 \"Shipped\"\n  s1 --> t1 --> t2 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Order handling",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Sales",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Approve order",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-3",
+            "label": "Warehouse",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Pick items",
+            "level": 4,
+            "parentId": "lane-3"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Shipped",
+            "level": 4,
+            "parentId": "lane-3"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#4",
+      "source": "bpmn-beta LR\n  lane \"Escalation\"\n    start timer s1 \"Every night\"\n    intermediate message i1 \"Await reply\"\n    throw escalation x1 \"Escalate\"\n    end terminate e1 \"Stop\"\n  s1 --> i1 --> x1 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Escalation",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Every night",
+            "level": 2,
+            "qualifier": "timer",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "intermediate",
+            "id": "i1",
+            "label": "Await reply",
+            "level": 2,
+            "qualifier": "message",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "throw",
+            "id": "x1",
+            "label": "Escalate",
+            "level": 2,
+            "qualifier": "escalation",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Stop",
+            "level": 2,
+            "qualifier": "terminate",
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "i1",
+            "kind": "sequence"
+          },
+          {
+            "from": "i1",
+            "to": "x1",
+            "kind": "sequence"
+          },
+          {
+            "from": "x1",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#5",
+      "source": "bpmn-beta LR\n  lane \"Review\"\n    start s1 \"Submitted\"\n    xor gw1 \"Approved?\"\n    and gw2 \"Fan out\"\n    end e1 \"Done\"\n  s1 --> gw1\n  gw1 -- yes --> gw2 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Review",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Submitted",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw1",
+            "label": "Approved?",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "and",
+            "id": "gw2",
+            "label": "Fan out",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Done",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "gw1",
+            "kind": "sequence"
+          },
+          {
+            "from": "gw1",
+            "to": "gw2",
+            "kind": "sequence",
+            "label": "yes"
+          },
+          {
+            "from": "gw2",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#6",
+      "source": "bpmn-beta LR\n  lane \"Fulfilment\"\n    user task t1 \"Review order\"\n    service task t2 \"Charge card\"\n    script task t3 \"Generate label\"\n    subprocess sp1 \"Pack goods\"\n    call c1 \"Ship via carrier\"\n  t1 --> t2 --> t3 --> sp1 --> c1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Fulfilment",
+            "level": 0
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Review order",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Charge card",
+            "level": 2,
+            "qualifier": "service",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t3",
+            "label": "Generate label",
+            "level": 2,
+            "qualifier": "script",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "subprocess",
+            "id": "sp1",
+            "label": "Pack goods",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "call",
+            "id": "c1",
+            "label": "Ship via carrier",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "t3",
+            "kind": "sequence"
+          },
+          {
+            "from": "t3",
+            "to": "sp1",
+            "kind": "sequence"
+          },
+          {
+            "from": "sp1",
+            "to": "c1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#7",
+      "source": "bpmn-beta LR\n  lane \"Support\"\n    start s1 \"Ticket raised\"\n    task t1 \"Await customer\"\n      boundary timer b1 \"3 days\"\n    end e1 \"Resolved\"\n    end e2 \"Timed out\"\n  s1 --> t1 --> e1\n  b1 --> e2",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Support",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Ticket raised",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Await customer",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "boundary",
+            "id": "b1",
+            "label": "3 days",
+            "level": 4,
+            "qualifier": "timer",
+            "parentId": "t1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Resolved",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e2",
+            "label": "Timed out",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "b1",
+            "to": "e2",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#8",
+      "source": "bpmn-beta LR\n  pool \"Customer\"\n    lane \"Buyer\"\n      start s1 \"Needs goods\"\n      task t1 \"Place order\"\n  pool \"Supplier\"\n    lane \"Sales\"\n      task t2 \"Receive order\"\n      end e1 \"Fulfilled\"\n  s1 --> t1\n  t1 -.-> t2\n  t2 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-1",
+            "label": "Customer",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-2",
+            "label": "Buyer",
+            "level": 2,
+            "parentId": "pool-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Needs goods",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Place order",
+            "level": 4,
+            "parentId": "lane-2"
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "pool-3",
+            "label": "Supplier",
+            "level": 0
+          },
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-4",
+            "label": "Sales",
+            "level": 2,
+            "parentId": "pool-3"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Receive order",
+            "level": 4,
+            "parentId": "lane-4"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Fulfilled",
+            "level": 4,
+            "parentId": "lane-4"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "message"
+          },
+          {
+            "from": "t2",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#9",
+      "source": "bpmn-beta LR\n  lane \"Fulfilment\"\n    start s1 \"Begin\"\n    group \"Warehouse work\"\n      task t1 \"Pick items\"\n      task t2 \"Pack\"\n    data d1 \"Pick list\"\n    data-store ds1 \"Inventory\"\n    note n1 \"Stock checked nightly\"\n    end e1 \"Done\"\n  s1 --> t1 --> t2 --> e1\n  d1 ..> t1\n  n1 ... t2",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Fulfilment",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Begin",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "group",
+            "keyword": "group",
+            "id": "group-2",
+            "label": "Warehouse work",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Pick items",
+            "level": 4,
+            "parentId": "group-2"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Pack",
+            "level": 4,
+            "parentId": "group-2"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "d1",
+            "label": "Pick list",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "store",
+            "keyword": "data-store",
+            "id": "ds1",
+            "label": "Inventory",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "annotation",
+            "keyword": "note",
+            "id": "n1",
+            "label": "Stock checked nightly",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Done",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "d1",
+            "to": "t1",
+            "kind": "association",
+            "directed": true
+          },
+          {
+            "from": "n1",
+            "to": "t2",
+            "kind": "association",
+            "directed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#10",
+      "source": "bpmn-beta LR\n  lane \"Sales\"\n    start s1 \"Order received\"\n    data-input in1 \"Order form\"\n    user task t1 \"Check the order\"\n    data-output out1 \"Approval\"\n    data-collection many \"Line items\"\n    end e1 \"Filed\"\n  s1 --> t1 --> e1\n  in1 ..> t1\n  t1 ..> out1\n  many ..> t1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Sales",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Order received",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "in1",
+            "label": "Order form",
+            "level": 2,
+            "qualifier": "input",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Check the order",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "out1",
+            "label": "Approval",
+            "level": 2,
+            "qualifier": "output",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "data",
+            "keyword": "data",
+            "id": "many",
+            "label": "Line items",
+            "level": 2,
+            "qualifier": "collection",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Filed",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "in1",
+            "to": "t1",
+            "kind": "association",
+            "directed": true
+          },
+          {
+            "from": "t1",
+            "to": "out1",
+            "kind": "association",
+            "directed": true
+          },
+          {
+            "from": "many",
+            "to": "t1",
+            "kind": "association",
+            "directed": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#11",
+      "source": "bpmn-beta LR\n  lane \"Wide\"\n    start s1 \"Begin\"\n    task t1 \"Work\"\n    end e1 \"Done\"\n  s1 --> t1 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Wide",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Begin",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Work",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Done",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmn.md#12",
+      "source": "bpmn-beta LR\n  lane \"Themed\"\n    start s1 \"Begin\"\n    task t1 \"Work\"\n    xor gw \"Done?\"\n    end e1 \"End\"\n  s1 --> t1 --> gw --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Themed",
+            "level": 0
+          },
+          {
+            "kind": "event",
+            "keyword": "start",
+            "id": "s1",
+            "label": "Begin",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Work",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw",
+            "label": "Done?",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "End",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "s1",
+            "to": "t1",
+            "kind": "sequence"
+          },
+          {
+            "from": "t1",
+            "to": "gw",
+            "kind": "sequence"
+          },
+          {
+            "from": "gw",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmnElements.md#1",
+      "source": "bpmn-beta LR\n  pool buyer \"Buyer\"\n  pool seller \"Seller\"\n  buyer -.-> seller",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "buyer",
+            "label": "Buyer",
+            "level": 0
+          },
+          {
+            "kind": "pool",
+            "keyword": "pool",
+            "id": "seller",
+            "label": "Seller",
+            "level": 0
+          }
+        ],
+        "flows": [
+          {
+            "from": "buyer",
+            "to": "seller",
+            "kind": "message"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmnElements.md#2",
+      "source": "bpmn-beta LR\n  lane \"Orders\"\n    user task t1 \"Await approval\"\n      boundary timer b1 \"2 days\"\n    end e1 \"Filed\"\n  t1 --> e1\n  b1 --> e1",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Orders",
+            "level": 0
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Await approval",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "event",
+            "keyword": "boundary",
+            "id": "b1",
+            "label": "2 days",
+            "level": 4,
+            "qualifier": "timer",
+            "parentId": "t1"
+          },
+          {
+            "kind": "event",
+            "keyword": "end",
+            "id": "e1",
+            "label": "Filed",
+            "level": 2,
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "t1",
+            "to": "e1",
+            "kind": "sequence"
+          },
+          {
+            "from": "b1",
+            "to": "e1",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmnElements.md#3",
+      "source": "bpmn-beta LR\n  lane \"Fulfilment\"\n    receive task t1 \"Receive the order\"\n    rule task t2 \"Apply the price list\"\n    send task t3 \"Confirm\"\n  t1 --> t2 --> t3",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Fulfilment",
+            "level": 0
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t1",
+            "label": "Receive the order",
+            "level": 2,
+            "qualifier": "receive",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t2",
+            "label": "Apply the price list",
+            "level": 2,
+            "qualifier": "rule",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "t3",
+            "label": "Confirm",
+            "level": 2,
+            "qualifier": "send",
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "t1",
+            "to": "t2",
+            "kind": "sequence"
+          },
+          {
+            "from": "t2",
+            "to": "t3",
+            "kind": "sequence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "docs/syntax/bpmnElements.md#4",
+      "source": "bpmn-beta LR\n  lane \"Review\"\n    xor gw \"Approved?\"\n    user task ship \"Ship it\"\n    user task refund \"Refund it\"\n  gw -- yes --> ship\n  gw -- no --> refund",
+      "parsed": {
+        "direction": "LR",
+        "nodes": [
+          {
+            "kind": "lane",
+            "keyword": "lane",
+            "id": "lane-1",
+            "label": "Review",
+            "level": 0
+          },
+          {
+            "kind": "gateway",
+            "keyword": "xor",
+            "id": "gw",
+            "label": "Approved?",
+            "level": 2,
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "ship",
+            "label": "Ship it",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          },
+          {
+            "kind": "activity",
+            "keyword": "task",
+            "id": "refund",
+            "label": "Refund it",
+            "level": 2,
+            "qualifier": "user",
+            "parentId": "lane-1"
+          }
+        ],
+        "flows": [
+          {
+            "from": "gw",
+            "to": "ship",
+            "kind": "sequence",
+            "label": "yes"
+          },
+          {
+            "from": "gw",
+            "to": "refund",
+            "kind": "sequence",
+            "label": "no"
+          }
+        ]
+      }
+    }
+  ]
+}

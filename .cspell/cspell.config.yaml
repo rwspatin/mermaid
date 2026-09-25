@@ -51,5 +51,6 @@ dictionaries:
 
 ignorePaths:
   - '*.txt' # do not spell check local dictionaries
+  - '**/__fixtures__/**' # generated test fixtures, not prose
 
 # cspell:dictionary misc-terms

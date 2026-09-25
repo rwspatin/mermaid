@@ -2,7 +2,14 @@ import { CstParser, Lexer } from 'chevrotain';
 import type { CstNode, IToken } from 'chevrotain';
 import * as t from './bpmn.tokens.js';
 import { bpmnTokens } from './bpmn.tokens.js';
-import { TRIGGERS_BY_POSITION, positionsFor } from '../types.js';
+import {
+  BPMN_DIRECTIONS,
+  EVENT_TRIGGERS,
+  KEYWORD_SYNONYMS,
+  TASK_TYPES,
+  TRIGGERS_BY_POSITION,
+  positionsFor,
+} from '../types.js';
 
 const listOf = (items: string[]): string =>
   items.length > 1 ? `${items.slice(0, -1).join(', ')} or ${items[items.length - 1]}` : items[0];
@@ -17,78 +24,54 @@ class BpmnParser extends CstParser {
     this.MANY(() => this.CONSUME(t.Newline));
     this.OPTION(() => this.CONSUME(t.Indent));
     this.CONSUME(t.Header);
-    this.OPTION2(() => this.CONSUME(t.Direction));
+    // The direction is just a word; the visitor checks it is a real direction.
+    this.OPTION2(() => this.CONSUME(t.Identifier));
     this.MANY2(() => this.SUBRULE(this.line));
   });
 
   private line = this.RULE('line', () => {
     this.AT_LEAST_ONE(() => this.CONSUME(t.Newline));
     this.OPTION(() => this.CONSUME(t.Indent));
-    this.OPTION2(() =>
+    this.OPTION2(() => this.SUBRULE(this.statement));
+  });
+
+  // A statement is either a meta line (its own distinct tokens) or a line that opens with a
+  // word — which becomes either a declaration or a flow depending on what follows the word.
+  private statement = this.RULE('statement', () => {
+    this.OR([
+      { ALT: () => this.SUBRULE(this.meta) },
+      { ALT: () => this.SUBRULE(this.identifierStatement) },
+    ]);
+  });
+
+  private identifierStatement = this.RULE('identifierStatement', () => {
+    this.CONSUME(t.Identifier);
+    // A connector right after the first word makes the line a flow; otherwise the remaining words
+    // (and an optional quoted label) make it a declaration. The two alternatives begin with
+    // disjoint tokens (a connector vs. a word / string / nothing), so the choice is unambiguous —
+    // and a flow admits no trailing words, so `a --> b task c` is a syntax error, not a silent drop.
+    this.OR([
+      { ALT: () => this.SUBRULE(this.flowTail) },
+      {
+        ALT: () => {
+          this.MANY(() => this.CONSUME2(t.Identifier));
+          this.OPTION(() => this.CONSUME(t.QuotedString));
+        },
+      },
+    ]);
+  });
+
+  private flowTail = this.RULE('flowTail', () => {
+    this.AT_LEAST_ONE(() => {
       this.OR([
-        { ALT: () => this.SUBRULE(this.container) },
-        { ALT: () => this.SUBRULE(this.event) },
-        { ALT: () => this.SUBRULE(this.gateway) },
-        { ALT: () => this.SUBRULE(this.activity) },
-        { ALT: () => this.SUBRULE(this.artifact) },
-        { ALT: () => this.SUBRULE(this.meta) },
-        { ALT: () => this.SUBRULE(this.flow) },
-      ])
-    );
-  });
-
-  private container = this.RULE('container', () => {
-    this.OR([
-      { ALT: () => this.CONSUME(t.Pool) },
-      { ALT: () => this.CONSUME(t.Lane) },
-      { ALT: () => this.CONSUME(t.Group) },
-    ]);
-    this.SUBRULE(this.nameAndLabel);
-  });
-
-  private event = this.RULE('event', () => {
-    this.OR([
-      { ALT: () => this.CONSUME(t.Start) },
-      { ALT: () => this.CONSUME(t.Intermediate) },
-      { ALT: () => this.CONSUME(t.Boundary) },
-      { ALT: () => this.CONSUME(t.End) },
-      { ALT: () => this.CONSUME(t.Throw) },
-    ]);
-    this.OPTION(() => this.CONSUME(t.Trigger));
-    this.SUBRULE(this.nameAndLabel);
-  });
-
-  private gateway = this.RULE('gateway', () => {
-    this.OR([
-      { ALT: () => this.CONSUME(t.Xor) },
-      { ALT: () => this.CONSUME(t.And) },
-      { ALT: () => this.CONSUME(t.Or) },
-      { ALT: () => this.CONSUME(t.EventGateway) },
-      { ALT: () => this.CONSUME(t.Complex) },
-    ]);
-    this.SUBRULE(this.nameAndLabel);
-  });
-
-  private activity = this.RULE('activity', () => {
-    this.OPTION(() => this.CONSUME(t.TaskType));
-    this.OR([
-      { ALT: () => this.CONSUME(t.Task) },
-      { ALT: () => this.CONSUME(t.Subprocess) },
-      { ALT: () => this.CONSUME(t.Call) },
-    ]);
-    this.SUBRULE(this.nameAndLabel);
-  });
-
-  private artifact = this.RULE('artifact', () => {
-    this.OR([
-      { ALT: () => this.CONSUME(t.DataStore) },
-      { ALT: () => this.CONSUME(t.DataCollection) },
-      { ALT: () => this.CONSUME(t.DataInput) },
-      { ALT: () => this.CONSUME(t.DataOutput) },
-      { ALT: () => this.CONSUME(t.DataObject) },
-      { ALT: () => this.CONSUME(t.Annotation) },
-    ]);
-    this.SUBRULE(this.nameAndLabel);
+        { ALT: () => this.CONSUME(t.LabelledArrow) },
+        { ALT: () => this.CONSUME(t.MessageArrow) },
+        { ALT: () => this.CONSUME(t.Arrow) },
+        { ALT: () => this.CONSUME(t.AssociationArrow) },
+        { ALT: () => this.CONSUME(t.AssociationLine) },
+      ]);
+      this.CONSUME(t.Identifier);
+    });
   });
 
   private meta = this.RULE('meta', () => {
@@ -98,25 +81,6 @@ class BpmnParser extends CstParser {
       { ALT: () => this.CONSUME(t.AccDescrMultiline) },
       { ALT: () => this.CONSUME(t.AccDescr) },
     ]);
-  });
-
-  private nameAndLabel = this.RULE('nameAndLabel', () => {
-    this.OPTION(() => this.CONSUME(t.Identifier));
-    this.OPTION2(() => this.CONSUME(t.QuotedString));
-  });
-
-  private flow = this.RULE('flow', () => {
-    this.CONSUME(t.Identifier);
-    this.AT_LEAST_ONE(() => {
-      this.OR([
-        { ALT: () => this.CONSUME(t.LabelledArrow) },
-        { ALT: () => this.CONSUME(t.MessageArrow) },
-        { ALT: () => this.CONSUME(t.Arrow) },
-        { ALT: () => this.CONSUME(t.AssociationArrow) },
-        { ALT: () => this.CONSUME(t.AssociationLine) },
-      ]);
-      this.CONSUME2(t.Identifier);
-    });
   });
 }
 
@@ -168,6 +132,34 @@ const imageOf = (token?: IToken) => token?.image ?? '';
 
 const arrowLabel = (image: string) => image.replace(/^--/, '').replace(/-+>$/, '').trim();
 
+const byOffset = (a: IToken, b: IToken) => (a.startOffset ?? 0) - (b.startOffset ?? 0);
+
+// ---- keyword resolution (by position, case-insensitive, synonym-tolerant) ------------------
+// Every accepted word — canonical or synonym — maps to the one canonical keyword the visitor
+// emits. Built once from the KEYWORD_SYNONYMS table.
+const CANONICAL = new Map<string, string>();
+for (const [canonical, synonyms] of Object.entries(KEYWORD_SYNONYMS)) {
+  CANONICAL.set(canonical, canonical);
+  for (const synonym of synonyms) {
+    CANONICAL.set(synonym, canonical);
+  }
+}
+const DIRECTIONS = new Set<string>(BPMN_DIRECTIONS);
+const TRIGGERS = new Set<string>(EVENT_TRIGGERS);
+const TASK_TYPE_SET = new Set<string>(TASK_TYPES);
+const CONTAINER_KEYWORDS = new Set(['pool', 'lane', 'group']);
+const EVENT_KEYWORDS = new Set(['start', 'intermediate', 'boundary', 'end', 'throw']);
+const GATEWAY_KEYWORDS = new Set(['xor', 'and', 'or', 'event-gateway', 'complex']);
+const ACTIVITY_KEYWORDS = new Set(['task', 'subprocess', 'call']);
+const ARTIFACT_KEYWORDS = new Set([
+  'data-store',
+  'data-collection',
+  'data-input',
+  'data-output',
+  'data',
+  'note',
+]);
+
 class BpmnVisitor extends BpmnBaseVisitor {
   private nodes: ParsedNode[] = [];
   private flows: ParsedFlow[] = [];
@@ -207,9 +199,15 @@ class BpmnVisitor extends BpmnBaseVisitor {
   }
 
   public diagram(ctx: Record<string, CstNode[] | IToken[]>) {
-    const direction = (ctx.Direction as IToken[] | undefined)?.[0];
+    const direction = (ctx.Identifier as IToken[] | undefined)?.[0];
     if (direction) {
-      this.direction = direction.image;
+      const upper = direction.image.toUpperCase();
+      if (!DIRECTIONS.has(upper)) {
+        throw new Error(
+          `BPMN parse error at line ${direction.startLine ?? '?'}: '${direction.image}' is not a direction (use ${listOf([...BPMN_DIRECTIONS])}).`
+        );
+      }
+      this.direction = upper;
     }
     for (const line of (ctx.line as CstNode[] | undefined) ?? []) {
       this.visit(line);
@@ -220,101 +218,52 @@ class BpmnVisitor extends BpmnBaseVisitor {
   public line(ctx: Record<string, CstNode[] | IToken[]>) {
     const indent = (ctx.Indent as IToken[] | undefined)?.[0];
     const level = indent ? indent.image.length : 0;
-    const meta = (ctx.meta as CstNode[] | undefined)?.[0];
-    if (meta) {
-      this.visit(meta);
+    const statement = (ctx.statement as CstNode[] | undefined)?.[0];
+    if (!statement) {
       return;
     }
-    for (const key of ['container', 'event', 'gateway', 'activity', 'artifact'] as const) {
-      const rule = (ctx[key] as CstNode[] | undefined)?.[0];
-      if (rule) {
-        const node = this.visit(rule) as ParsedNode;
-        this.baseLevel ??= level;
-        node.level = Math.max(0, level - this.baseLevel);
-        this.nodes.push(node);
-        return;
-      }
-    }
-    const flow = (ctx.flow as CstNode[] | undefined)?.[0];
-    if (flow) {
-      this.visit(flow);
+    const result = this.visit(statement) as { type: 'node'; node: ParsedNode } | { type: string };
+    if (result?.type === 'node') {
+      const { node } = result as { node: ParsedNode };
+      this.baseLevel ??= level;
+      node.level = Math.max(0, level - this.baseLevel);
+      this.nodes.push(node);
     }
   }
 
-  public container(ctx: Record<string, CstNode[] | IToken[]>): ParsedNode {
-    const keyword = ctx.Pool ? 'pool' : ctx.Group ? 'group' : 'lane';
-    return this.element(ctx, keyword, keyword);
-  }
-
-  public event(ctx: Record<string, CstNode[] | IToken[]>): ParsedNode {
-    const opener = ['Start', 'Intermediate', 'Boundary', 'End', 'Throw'].find((name) => ctx[name]);
-    const keyword = opener?.toLowerCase() ?? 'start';
-    const node = this.element(ctx, 'event', keyword);
-    const triggerToken = (ctx.Trigger as IToken[] | undefined)?.[0];
-    node.qualifier = imageOf(triggerToken) || undefined;
-    this.checkTrigger(
-      keyword,
-      node.qualifier ?? 'none',
-      triggerToken ?? (opener ? (ctx[opener] as IToken[])[0] : undefined)
-    );
-    return node;
-  }
-
-  private checkTrigger(keyword: string, trigger: string, at?: IToken): void {
-    const allowed = TRIGGERS_BY_POSITION[keyword as keyof typeof TRIGGERS_BY_POSITION] as
-      | readonly string[]
-      | undefined;
-    if (!allowed || allowed.includes(trigger)) {
-      return;
+  public statement(ctx: Record<string, CstNode[]>) {
+    if (ctx.meta) {
+      this.visit(ctx.meta[0]);
+      return { type: 'meta' as const };
     }
-    const where = `at line ${at?.startLine ?? '?'}`;
-    if (trigger === 'none') {
-      throw new Error(`BPMN error ${where}: a ${keyword} event must name what triggers it.`);
-    }
-    const positions = positionsFor(trigger);
-    const instead = positions.length
-      ? ` The notation draws ${trigger} on ${listOf(positions)} events.`
-      : '';
-    throw new Error(
-      `BPMN error ${where}: a ${keyword} event cannot carry the ${trigger} trigger.${instead}`
-    );
+    return this.visit(ctx.identifierStatement[0]);
   }
 
-  public gateway(ctx: Record<string, CstNode[] | IToken[]>): ParsedNode {
-    const byToken: Record<string, string> = {
-      Xor: 'xor',
-      And: 'and',
-      Or: 'or',
-      EventGateway: 'event-gateway',
-      Complex: 'complex',
-    };
-    const token = Object.keys(byToken).find((name) => ctx[name]);
-    return this.element(ctx, 'gateway', token ? byToken[token] : 'xor');
+  public identifierStatement(ctx: Record<string, CstNode[] | IToken[]>) {
+    const words = [...((ctx.Identifier as IToken[]) ?? [])].sort(byOffset);
+    const flowTail = (ctx.flowTail as CstNode[] | undefined)?.[0];
+    if (flowTail) {
+      const { connectors, ids } = this.visit(flowTail) as {
+        connectors: IToken[];
+        ids: IToken[];
+      };
+      this.buildFlows(words[0], connectors, ids);
+      return { type: 'flows' as const };
+    }
+    const quoted = (ctx.QuotedString as IToken[] | undefined)?.[0];
+    return { type: 'node' as const, node: this.buildDeclaration(words, quoted) };
   }
 
-  public activity(ctx: Record<string, CstNode[] | IToken[]>): ParsedNode {
-    const keyword = ctx.Subprocess ? 'subprocess' : ctx.Call ? 'call' : 'task';
-    const node = this.element(ctx, 'activity', keyword);
-    node.qualifier = imageOf((ctx.TaskType as IToken[] | undefined)?.[0]) || undefined;
-    return node;
-  }
-
-  public artifact(ctx: Record<string, CstNode[] | IToken[]>): ParsedNode {
-    if (ctx.DataStore) {
-      return this.element(ctx, 'store', 'data-store');
-    }
-    if (ctx.Annotation) {
-      return this.element(ctx, 'annotation', 'note');
-    }
-    const node = this.element(ctx, 'data', 'data');
-    node.qualifier = ctx.DataInput
-      ? 'input'
-      : ctx.DataOutput
-        ? 'output'
-        : ctx.DataCollection
-          ? 'collection'
-          : undefined;
-    return node;
+  public flowTail(ctx: Record<string, IToken[]>) {
+    const connectors = [
+      ...(ctx.LabelledArrow ?? []),
+      ...(ctx.MessageArrow ?? []),
+      ...(ctx.Arrow ?? []),
+      ...(ctx.AssociationArrow ?? []),
+      ...(ctx.AssociationLine ?? []),
+    ].sort(byOffset);
+    const ids = [...(ctx.Identifier ?? [])].sort(byOffset);
+    return { connectors, ids };
   }
 
   public meta(ctx: Record<string, IToken[]>) {
@@ -344,25 +293,8 @@ class BpmnVisitor extends BpmnBaseVisitor {
     }
   }
 
-  public nameAndLabel(ctx: Record<string, IToken[]>) {
-    const quoted = ctx.QuotedString?.[0];
-    return {
-      id: imageOf(ctx.Identifier?.[0]),
-      label: quoted ? quoted.image.slice(1, -1) : '',
-    };
-  }
-
-  public flow(ctx: Record<string, IToken[]>) {
-    const byOffset = (a: IToken, b: IToken) => (a.startOffset ?? 0) - (b.startOffset ?? 0);
-    const ids = [...(ctx.Identifier ?? [])].sort(byOffset);
-    const connectors = [
-      ...(ctx.LabelledArrow ?? []),
-      ...(ctx.MessageArrow ?? []),
-      ...(ctx.Arrow ?? []),
-      ...(ctx.AssociationArrow ?? []),
-      ...(ctx.AssociationLine ?? []),
-    ].sort(byOffset);
-
+  private buildFlows(source: IToken, connectors: IToken[], targets: IToken[]) {
+    const ids = [source, ...targets];
     for (const [index, connector] of connectors.entries()) {
       const from = ids[index];
       const to = ids[index + 1];
@@ -381,14 +313,121 @@ class BpmnVisitor extends BpmnBaseVisitor {
     }
   }
 
-  private element(
-    ctx: Record<string, CstNode[] | IToken[]>,
-    kind: ParsedNode['kind'],
-    keyword: string
-  ): ParsedNode {
-    const named = this.visit((ctx.nameAndLabel as CstNode[])[0]) as { id: string; label: string };
-    const id = named.id || `${keyword}-${++this.generated}`;
-    return { kind, keyword, id, label: named.label || named.id || '', level: 0 };
+  private buildDeclaration(words: IToken[], quoted?: IToken): ParsedNode {
+    const first = words[0];
+    const w0 = first.image.toLowerCase();
+    const label = quoted ? quoted.image.slice(1, -1) : '';
+    const line = first.startLine;
+
+    const make = (
+      kind: ParsedNode['kind'],
+      keyword: string,
+      idToken?: IToken,
+      qualifier?: string
+    ): ParsedNode => {
+      const idImage = idToken ? idToken.image : '';
+      const id = idImage || `${keyword}-${++this.generated}`;
+      const node: ParsedNode = { kind, keyword, id, label: label || idImage || '', level: 0 };
+      if (qualifier) {
+        node.qualifier = qualifier;
+      }
+      return node;
+    };
+
+    const tooMany = (max: number) => {
+      if (words.length > max) {
+        throw new Error(
+          `BPMN parse error at line ${line ?? '?'}: '${words.map((w) => w.image).join(' ')}' has more words than a ${w0} statement takes.`
+        );
+      }
+    };
+
+    // A task type opens an activity: `user task t1`.
+    if (TASK_TYPE_SET.has(w0)) {
+      const activityKeyword = words[1] ? CANONICAL.get(words[1].image.toLowerCase()) : undefined;
+      if (!activityKeyword || !ACTIVITY_KEYWORDS.has(activityKeyword)) {
+        throw new Error(
+          `BPMN parse error at line ${line ?? '?'}: '${first.image}' must be followed by task, subprocess or call.`
+        );
+      }
+      tooMany(3);
+      return make('activity', activityKeyword, words[2], w0);
+    }
+
+    const canonical = CANONICAL.get(w0);
+    if (!canonical) {
+      throw new Error(
+        `BPMN parse error at line ${line ?? '?'}: '${first.image}' is not a BPMN element keyword.`
+      );
+    }
+
+    if (CONTAINER_KEYWORDS.has(canonical)) {
+      tooMany(2);
+      return make(canonical as ParsedNode['kind'], canonical, words[1]);
+    }
+    if (GATEWAY_KEYWORDS.has(canonical)) {
+      tooMany(2);
+      return make('gateway', canonical, words[1]);
+    }
+    if (ACTIVITY_KEYWORDS.has(canonical)) {
+      tooMany(2);
+      return make('activity', canonical, words[1]);
+    }
+    if (EVENT_KEYWORDS.has(canonical)) {
+      let qualifier: string | undefined;
+      let idToken = words[1];
+      if (words[1] && TRIGGERS.has(words[1].image.toLowerCase())) {
+        qualifier = words[1].image.toLowerCase();
+        idToken = words[2];
+        tooMany(3);
+      } else {
+        tooMany(2);
+      }
+      const node = make('event', canonical, idToken, qualifier);
+      this.checkTrigger(canonical, qualifier ?? 'none', first);
+      return node;
+    }
+    if (!ARTIFACT_KEYWORDS.has(canonical)) {
+      throw new Error(
+        `BPMN parse error at line ${line ?? '?'}: '${first.image}' is not a BPMN element keyword.`
+      );
+    }
+    tooMany(2);
+    if (canonical === 'data-store') {
+      return make('store', 'data-store', words[1]);
+    }
+    if (canonical === 'note') {
+      return make('annotation', 'note', words[1]);
+    }
+    const qualifier =
+      canonical === 'data-input'
+        ? 'input'
+        : canonical === 'data-output'
+          ? 'output'
+          : canonical === 'data-collection'
+            ? 'collection'
+            : undefined;
+    return make('data', 'data', words[1], qualifier);
+  }
+
+  private checkTrigger(keyword: string, trigger: string, at?: IToken): void {
+    const allowed = TRIGGERS_BY_POSITION[keyword as keyof typeof TRIGGERS_BY_POSITION] as
+      | readonly string[]
+      | undefined;
+    if (!allowed || allowed.includes(trigger)) {
+      return;
+    }
+    const where = `at line ${at?.startLine ?? '?'}`;
+    if (trigger === 'none') {
+      throw new Error(`BPMN error ${where}: a ${keyword} event must name what triggers it.`);
+    }
+    const positions = positionsFor(trigger);
+    const instead = positions.length
+      ? ` The notation draws ${trigger} on ${listOf(positions)} events.`
+      : '';
+    throw new Error(
+      `BPMN error ${where}: a ${keyword} event cannot carry the ${trigger} trigger.${instead}`
+    );
   }
 
   private assignParents() {

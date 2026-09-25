@@ -6,7 +6,7 @@ import type {
 
 const id = 'bpmn';
 
-const detector: DiagramDetector = (txt) => /^\s*bpmn-beta\b/.test(txt);
+const detector: DiagramDetector = (txt) => /^\s*bpmn-beta\b/i.test(txt);
 
 const loader: DiagramLoader = async () => {
   const { diagram } = await import('./diagram.js');

@@ -1,6 +1,5 @@
 import { createToken, Lexer } from 'chevrotain';
 import type { CustomPatternMatcherFunc, TokenType } from 'chevrotain';
-import { BPMN_DIRECTIONS, EVENT_TRIGGERS, TASK_TYPES } from '../types.js';
 
 const asMatch = (image: string, offset: number, text: string): RegExpExecArray => {
   const match = [image] as unknown as RegExpExecArray;
@@ -39,72 +38,20 @@ export const Comment = createToken({
   group: Lexer.SKIPPED,
 });
 
+// A single word token covers both element keywords and identifiers. Keyword tolerance
+// (case-insensitivity + synonyms) is resolved by POSITION in the visitor, not by the lexer,
+// so it never reserves a word that is used as an id or as a flow endpoint. A word that only
+// begins with a keyword is naturally still one word here — there is nothing to shadow.
 export const Identifier = createToken({
   name: 'Identifier',
   pattern: /[A-Z_a-z]\w*(?:-\w+)*/,
 });
 
-const keyword = (name: string, literal: string) =>
-  createToken({
-    name,
-    pattern: new RegExp(literal.replaceAll('-', '\\-')),
-    longer_alt: Identifier,
-  });
-
-const alternation = (words: readonly string[]) => new RegExp(words.join('|'));
-
+// `bpmn-beta` opens the diagram; matched case-insensitively for the same tolerance as the
+// keywords. It is longer than any real id and never conflicts with one.
 export const Header = createToken({
   name: 'Header',
-  pattern: /bpmn-beta/,
-  longer_alt: Identifier,
-});
-export const Direction = createToken({
-  name: 'Direction',
-  pattern: alternation(BPMN_DIRECTIONS),
-  longer_alt: Identifier,
-});
-
-export const Pool = keyword('Pool', 'pool');
-export const Lane = keyword('Lane', 'lane');
-
-export const Start = keyword('Start', 'start');
-export const Intermediate = keyword('Intermediate', 'intermediate');
-export const Boundary = keyword('Boundary', 'boundary');
-export const End = keyword('End', 'end');
-
-export const Throw = keyword('Throw', 'throw');
-
-export const Task = keyword('Task', 'task');
-export const Subprocess = keyword('Subprocess', 'subprocess');
-
-export const Call = keyword('Call', 'call');
-
-export const EventGateway = keyword('EventGateway', 'event-gateway');
-export const Xor = keyword('Xor', 'xor');
-export const And = keyword('And', 'and');
-export const Or = keyword('Or', 'or');
-export const Complex = keyword('Complex', 'complex');
-
-export const DataStore = keyword('DataStore', 'data-store');
-
-export const DataCollection = keyword('DataCollection', 'data-collection');
-
-export const DataInput = keyword('DataInput', 'data-input');
-
-export const DataOutput = keyword('DataOutput', 'data-output');
-export const DataObject = keyword('DataObject', 'data');
-export const Annotation = keyword('Annotation', 'note');
-
-export const Group = keyword('Group', 'group');
-
-export const Trigger = createToken({
-  name: 'Trigger',
-  pattern: alternation(EVENT_TRIGGERS),
-  longer_alt: Identifier,
-});
-export const TaskType = createToken({
-  name: 'TaskType',
-  pattern: alternation(TASK_TYPES),
+  pattern: /bpmn-beta/i,
   longer_alt: Identifier,
 });
 
@@ -127,8 +74,10 @@ export const LabelledArrow = createToken({
   name: 'LabelledArrow',
   pattern: /--(?![>-])[^\n\r]*?--+>/,
 });
-export const MessageArrow = createToken({ name: 'MessageArrow', pattern: /-\.->/ });
-export const Arrow = createToken({ name: 'Arrow', pattern: /--+>/ });
+// `-.->` is the canonical message flow; `=>` and `==>` (exactly) are accepted synonyms.
+export const MessageArrow = createToken({ name: 'MessageArrow', pattern: /-\.->|={1,2}>/ });
+// `-->` is the canonical sequence flow; the unicode arrow `→` is an accepted synonym.
+export const Arrow = createToken({ name: 'Arrow', pattern: /--+>|→/ });
 
 export const AssociationArrow = createToken({ name: 'AssociationArrow', pattern: /\.\.+>/ });
 
@@ -150,30 +99,5 @@ export const bpmnTokens: TokenType[] = [
   AccDescr,
   QuotedString,
   Header,
-  Direction,
-  Pool,
-  Lane,
-  Start,
-  Intermediate,
-  Boundary,
-  End,
-  Throw,
-  Subprocess,
-  Task,
-  Call,
-  EventGateway,
-  Xor,
-  And,
-  Or,
-  Complex,
-  DataStore,
-  DataCollection,
-  DataInput,
-  DataOutput,
-  DataObject,
-  Annotation,
-  Group,
-  Trigger,
-  TaskType,
   Identifier,
 ];
