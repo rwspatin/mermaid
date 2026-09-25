@@ -630,6 +630,10 @@ export interface BPMNDiagramConfig extends BaseDiagramConfig {
    * The distance between two ranks of a lane.
    */
   rankSpacing?: number;
+  /**
+   * When true, a BPMN semantic-rule violation makes the diagram fail to parse like a syntax error, reporting every violation at once; when false (the default) these rules never block rendering.
+   */
+  strict?: boolean;
 }
 /**
  * The object containing configurations specific for the agentflow diagram type.

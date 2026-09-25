@@ -11,6 +11,7 @@ import {
 import type { LayoutData, Node, NonClusterNode, Edge } from '../../rendering-util/types.js';
 import { parseBpmn } from './parser/bpmn.parser.js';
 import type { ParsedDiagram, ParsedFlow, ParsedNode } from './parser/bpmn.parser.js';
+import { collectViolations } from './bpmnValidate.js';
 
 type BpmnShape = NonNullable<NonClusterNode['shape']>;
 
@@ -82,6 +83,15 @@ export class BpmnDb {
 
   public parse(input: string) {
     this.parsed = parseBpmn(input);
+    // Semantic validation is opt-in. By default a diagram renders exactly as it does on the base
+    // stack; only `bpmn.strict` turns a semantic violation into a render-blocking error, reporting
+    // every violation at once.
+    if (getGlobalConfig().bpmn?.strict) {
+      const violations = collectViolations(this.parsed);
+      if (violations.length > 0) {
+        throw new Error(violations.join('\n'));
+      }
+    }
     if (this.parsed.title) {
       setDiagramTitle(this.parsed.title);
     }

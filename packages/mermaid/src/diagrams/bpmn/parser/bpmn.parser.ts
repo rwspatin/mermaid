@@ -108,6 +108,8 @@ export interface ParsedNode {
   label: string;
   level: number;
   parentId?: string;
+  /** 1-based source line the element is declared on, for validation messages. */
+  line?: number;
 }
 
 export interface ParsedFlow {
@@ -330,6 +332,9 @@ class BpmnVisitor extends BpmnBaseVisitor {
       const node: ParsedNode = { kind, keyword, id, label: label || idImage || '', level: 0 };
       if (qualifier) {
         node.qualifier = qualifier;
+      }
+      if (typeof first.startLine === 'number') {
+        node.line = first.startLine;
       }
       return node;
     };

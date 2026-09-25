@@ -2450,6 +2450,13 @@ $defs: # JSON Schema definition (maybe we should move these to a separate file)
         type: number
         minimum: 0
         default: 40
+      strict:
+        description: >-
+          When true, a BPMN semantic-rule violation makes the diagram fail to parse like a syntax
+          error, reporting every violation at once; when false (the default) these rules never
+          block rendering.
+        type: boolean
+        default: false
 
   AgentflowDiagramConfig:
     title: Agentflow Diagram Config
